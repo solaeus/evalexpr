@@ -77,6 +77,12 @@ pub enum EvalexprError {
         actual: Value,
     },
 
+    /// A map value was expected.
+    ExpectedMap {
+        /// The actual value.
+        actual: Value,
+    },
+
     /// A tuple value of a certain length was expected.
     ExpectedFixedLenTuple {
         /// The expected len

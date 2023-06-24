@@ -35,6 +35,7 @@ impl fmt::Display for EvalexprError {
                 write!(f, "Expected a Value::Boolean, but got {:?}.", actual)
             },
             ExpectedTuple { actual } => write!(f, "Expected a Value::Tuple, but got {:?}.", actual),
+            ExpectedMap { actual } => write!(f, "Expected a Value::Map but got {:?}.", actual),
             ExpectedFixedLenTuple {
                 expected_len,
                 actual,

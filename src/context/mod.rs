@@ -4,7 +4,7 @@
 //! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
-use std::{collections::HashMap, iter};
+use std::{arch::x86_64::_mm256_unpacklo_epi64, collections::HashMap, iter};
 
 use crate::{
     function::Function,
@@ -189,7 +189,24 @@ impl HashMapContext {
 
 impl Context for HashMapContext {
     fn get_value(&self, identifier: &str) -> Option<&Value> {
-        self.variables.get(identifier)
+        fn get_map<'a>(map: &'a HashMap<String, Value>, identifier: &str) -> Option<&'a Value> {
+            let split = identifier.split_once(".");
+            if let Some((identifier, next_identifier)) = split {
+                if let Some(value) = map.get(identifier) {
+                    if let Value::Map(map) = value {
+                        get_map(map, next_identifier)
+                    } else {
+                        Some(&value)
+                    }
+                } else {
+                    None
+                }
+            } else {
+                map.get(identifier)
+            }
+        }
+
+        get_map(&self.variables, identifier)
     }
 
     fn call_function(&self, identifier: &str, argument: &Value) -> EvalexprResult<Value> {
@@ -214,18 +231,45 @@ impl Context for HashMapContext {
 
 impl ContextWithMutableVariables for HashMapContext {
     fn set_value(&mut self, identifier: String, value: Value) -> EvalexprResult<()> {
-        if let Some(existing_value) = self.variables.get_mut(&identifier) {
-            if ValueType::from(&existing_value) == ValueType::from(&value) {
-                *existing_value = value;
-                return Ok(());
+        fn set_map(
+            map: &mut HashMap<String, Value>,
+            identifier: &str,
+            value: Value,
+        ) -> EvalexprResult<()> {
+            let split = identifier.split_once(".");
+
+            if let Some((map_name, next_identifier)) = split {
+                let get_value = map.get_mut(map_name);
+
+                if let Some(map_value) = get_value {
+                    if let Value::Map(map) = map_value {
+                        set_map(map, next_identifier, value)
+                    } else {
+                        Err(EvalexprError::ExpectedMap {
+                            actual: map_value.clone(),
+                        })
+                    }
+                } else {
+                    let mut new_map = HashMap::new();
+
+                    new_map.insert(next_identifier.to_string(), value);
+
+                    map.insert(map_name.to_string(), Value::Map(new_map));
+
+                    Ok(())
+                }
+            } else if map.contains_key(identifier) {
+                Err(EvalexprError::ExpectedMap {
+                    actual: value.clone(),
+                })
             } else {
-                return Err(EvalexprError::expected_type(existing_value, value));
+                map.insert(identifier.to_string(), value);
+
+                Ok(())
             }
         }
 
-        // Implicit else, because `self.variables` and `identifier` are not unborrowed in else
-        self.variables.insert(identifier, value);
-        Ok(())
+        set_map(&mut self.variables, &identifier, value)
     }
 }
 
