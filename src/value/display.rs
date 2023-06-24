@@ -22,6 +22,19 @@ impl Display for Value {
                 }
                 write!(f, ")")
             },
+            Value::Map(map) => {
+                write!(f, "( ")?;
+                let mut once = false;
+                for (key, value) in map {
+                    if once {
+                        write!(f, "{} = {}; ", key, value)?;
+                    } else {
+                        once = true;
+                    }
+                    value.fmt(f)?;
+                }
+                write!(f, ")")
+            },
             Value::Empty => write!(f, "()"),
         }
     }

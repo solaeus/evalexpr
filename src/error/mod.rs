@@ -267,6 +267,11 @@ impl EvalexprError {
         EvalexprError::ExpectedTuple { actual }
     }
 
+    /// Constructs `EvalexprError::ExpectedTuple{actual}`.
+    pub fn expected_map(actual: Value) -> Self {
+        EvalexprError::ExpectedTuple { actual }
+    }
+
     /// Constructs `EvalexprError::ExpectedFixedLenTuple{expected_len, actual}`.
     pub fn expected_fixed_len_tuple(expected_len: usize, actual: Value) -> Self {
         EvalexprError::ExpectedFixedLenTuple {
@@ -288,6 +293,7 @@ impl EvalexprError {
             ValueType::Float => Self::expected_float(actual),
             ValueType::Boolean => Self::expected_boolean(actual),
             ValueType::Tuple => Self::expected_tuple(actual),
+            ValueType::Map => Self::expected_map(actual),
             ValueType::Empty => Self::expected_empty(actual),
         }
     }
