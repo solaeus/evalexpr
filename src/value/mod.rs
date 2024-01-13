@@ -1,5 +1,5 @@
 use crate::error::{EvalexprError, EvalexprResult};
-use std::{convert::TryFrom, ops::RangeInclusive};
+use std::{collections::HashMap, convert::TryFrom, ops::RangeInclusive};
 
 mod display;
 pub mod value_type;
@@ -12,6 +12,9 @@ pub type FloatType = f64;
 
 /// The type used to represent tuples in `Value::Tuple`.
 pub type TupleType = Vec<Value>;
+
+/// The type used to represent empty values in `Value::Map`.
+pub type MapType = HashMap<String, Value>;
 
 /// The type used to represent empty values in `Value::Empty`.
 pub type EmptyType = ();
@@ -34,6 +37,8 @@ pub enum Value {
     Boolean(bool),
     /// A tuple value.
     Tuple(TupleType),
+    /// A map value.
+    Map(MapType),
     /// An empty value.
     Empty,
 }
@@ -66,6 +71,11 @@ impl Value {
     /// Returns true if `self` is a `Value::Tuple`.
     pub fn is_tuple(&self) -> bool {
         matches!(self, Value::Tuple(_))
+    }
+
+    /// Returns true if `self` is a `Value::Map`.
+    pub fn is_map(&self) -> bool {
+        matches!(self, Value::Map(_))
     }
 
     /// Returns true if `self` is a `Value::Empty`.

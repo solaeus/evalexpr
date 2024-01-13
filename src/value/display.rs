@@ -22,6 +22,13 @@ impl Display for Value {
                 }
                 write!(f, ")")
             },
+            Value::Map(map) => {
+                write!(f, "( ")?;
+                for (key, value) in map {
+                    write!(f, "{} = {}; ", key, value)?;
+                }
+                write!(f, ")")
+            },
             Value::Empty => write!(f, "()"),
         }
     }

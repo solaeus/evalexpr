@@ -104,6 +104,7 @@ pub fn builtin_function(identifier: &str) -> Option<Function> {
                 Value::Int(_) => "int",
                 Value::Boolean(_) => "boolean",
                 Value::Tuple(_) => "tuple",
+                Value::Map(_) => "map",
                 Value::Empty => "empty",
             }
             .into())
