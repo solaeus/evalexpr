@@ -4,13 +4,9 @@
 //! This crate implements two basic variants, the `EmptyContext`, that returns `None` for each identifier and cannot be manipulated, and the `HashMapContext`, that stores its mappings in hash maps.
 //! The HashMapContext is type-safe and returns an error if the user tries to assign a value of a different type than before to an identifier.
 
-use std::{arch::x86_64::_mm256_unpacklo_epi64, collections::HashMap, iter};
+use std::{collections::HashMap, iter};
 
-use crate::{
-    function::Function,
-    value::{value_type::ValueType, Value},
-    EvalexprError, EvalexprResult,
-};
+use crate::{function::Function, value::Value, EvalexprError, EvalexprResult};
 
 mod predefined;
 
